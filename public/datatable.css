@@ -1,0 +1,17 @@
+
+.datatable-wrapper{
+	overflow: hidden;
+}
+
+.datatable-wrapper > .datatable-thead {
+	margin-right:16px;	
+}
+
+.datatable-wrapper	> .datatable-thead > table {
+	margin:0;
+}
+
+.datatable-wrapper	> .datatable-tbody {
+	overflow-y: scroll;
+	max-height:400px;
+}

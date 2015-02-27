@@ -1,0 +1,24 @@
+{
+    "name": "maka/datatable",
+    "description": "Laravel datatable engine",
+	"keywords": ["laravel","datatable"],
+    "authors": [
+        {
+            "name": "maka",
+            "email": "54.maka@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "4.2.*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Maka\\Datatable\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
