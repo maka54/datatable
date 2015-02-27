@@ -35,46 +35,38 @@
 			
 			this.$header = $('<div class="datatable-thead"></div>').appendTo(this.$datatable);
 			this.$body = $('<div class="datatable-tbody"></div>').appendTo(this.$datatable);
-			
-			
-			this.replace();
-			
-			$(window).on('resize', function(){
-				self.reset();
-			});
-        },
-		
-		reset: function() {
-			this.$header.empty();
-			this.$body.empty();	
-			this.replace();
-		},
-		
-		replace: function() {	
-
+						
 			this.$clone = this.$element.clone();
 			this.$clone.find('tbody').remove();
 			this.$clone.appendTo(this.$header);
 			
-			this.$element.appendTo(this.$body);
-			this.$element.css({marginTop: - this.$clone.outerHeight(true) + 'px'});
+			this.$cells = this.$element.find('tbody tr:first').children();
+			this.$heads = this.$clone.find('thead tr:first').children();
+			this.$heading = this.$clone.find('thead');
 			
-			this.setup();
-		},
+			this.$element.appendTo(this.$body);
+			
+			this.resize();
+			
+			$(window).on('resize', function(){
+				self.resize();
+			});
+        },
 		
-		setup: function() {
+		resize: function() {	
+
 			var self = this,
-				$cells = this.$element.find('tbody tr:first').children(),
-				$heads = this.$header.find('thead tr:first').children(),
 				widths;
 			
-			widths = $cells.map(function() {
+			widths = this.$cells.map(function() {
 				return $(this).width();
 			}).get();
 			
-			$heads.each(function(index, th) {
+			this.$heads.each(function(index, th) {
 				$(th).append( $('<div></div>').width(widths[index]) );
 			});  
+			
+			this.$element.css({marginTop: - this.$heading.outerHeight(true) + 'px'});
 			
 		}
 

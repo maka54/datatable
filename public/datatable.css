@@ -12,6 +12,7 @@
 }
 
 .datatable-wrapper	> .datatable-tbody {
+	overflow-x: hidden;
 	overflow-y: scroll;
 	max-height:400px;
 }
