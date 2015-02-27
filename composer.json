@@ -2,6 +2,7 @@
     "name": "maka/datatable",
     "description": "Laravel datatable engine",
 	"keywords": ["laravel","datatable"],
+	"license": "MIT",
     "authors": [
         {
             "name": "maka",
@@ -13,9 +14,6 @@
         "illuminate/support": "4.2.*"
     },
     "autoload": {
-        "classmap": [
-            "src/migrations"
-        ],
         "psr-0": {
             "Maka\\Datatable\\": "src/"
         }
