@@ -11,6 +11,7 @@ class Datatable {
 	private $builder = null;
 	private $length = null;
 	private $columns = [];
+	private $fields = null;
 	private $withs = [];
 	private $paginate = false;
 	
@@ -29,10 +30,18 @@ class Datatable {
 		return $this;
 	}
 	
+	
+	
 	public function with(){
 		$this->withs = array_merge($this->withs, func_get_args());
 		return $this;
 	}
+	
+	public function select(){
+		$this->fields = func_get_args();
+		return $this;
+	}
+	
 	
 	
 	public function column( $column, $header = null, $value = null, $attrinute = array()){
@@ -43,7 +52,7 @@ class Datatable {
 	}
 	
 	
-	public function filter( $closure ){
+	public function query( $closure ){
 
 		if ( is_callable($closure) ){
 			call_user_func($closure, $this->builder);
@@ -76,6 +85,10 @@ class Datatable {
 	}
 		
 	private function build(){
+		
+
+		if( $this->fields )
+			call_user_func_array(array($this->builder, 'select'), $this->fields);
 
 		if($this->withs)
 			$this->builder->with( $this->withs );
