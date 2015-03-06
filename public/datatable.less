@@ -1,17 +1,24 @@
 
 .datatable-wrapper{
 	overflow: hidden;
+	position:relative;
 	
 	> .datatable-thead {
-		margin-right:16px;
 		> table {
 			margin:0;
+		}
+		&.affix{
+			z-index:2;
+			top:0;
+			width:inherit;
 		}
 	}
 
 	> .datatable-tbody {
-		overflow-x: hidden;
-	    overflow-y: scroll;
-		max-height:400px;
+		> table {
+			> thead {
+				visibility:hidden;
+			}
+		}
 	}
 }

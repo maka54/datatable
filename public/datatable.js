@@ -31,6 +31,7 @@
 			
 			var self = this;
 			
+			this.$container = this.$element.parent();
 			this.$datatable = $('<div class="datatable-wrapper"></div>').insertBefore(this.$element);
 			
 			this.$header = $('<div class="datatable-thead"></div>').appendTo(this.$datatable);
@@ -41,7 +42,11 @@
 			this.$clone.appendTo(this.$header);
 			
 			this.$cells = this.$element.find('tbody tr:first').children();
-			this.$heads = this.$clone.find('thead tr:first').children();
+			
+			this.$heads = this.$clone.find('thead tr:first').children().map(function() {
+				return $('<div></div>').appendTo( $(this) );
+			});  
+						
 			this.$heading = this.$clone.find('thead');
 			
 			this.$element.appendTo(this.$body);
@@ -51,6 +56,17 @@
 			$(window).on('resize', function(){
 				self.resize();
 			});
+			
+			$(window).on('scroll', function(){
+
+				if( $(this).scrollTop() > self.$datatable.offset().top ){
+					self.$header.addClass('affix');
+				} else {
+					self.$header.removeClass('affix');
+				}				
+			});
+			
+
         },
 		
 		resize: function() {	
@@ -63,10 +79,11 @@
 			}).get();
 			
 			this.$heads.each(function(index, th) {
-				$(th).append( $('<div></div>').width(widths[index]) );
+				$(this).width( widths[index] );
 			});  
 			
 			this.$element.css({marginTop: - this.$heading.outerHeight(true) + 'px'});
+			this.$header.width( this.$container.width() );
 			
 		}
 

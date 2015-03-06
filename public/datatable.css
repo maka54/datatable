@@ -3,16 +3,16 @@
 	overflow: hidden;
 }
 
-.datatable-wrapper > .datatable-thead {
-	margin-right:16px;	
-}
-
 .datatable-wrapper	> .datatable-thead > table {
 	margin:0;
 }
 
-.datatable-wrapper	> .datatable-tbody {
-	overflow-x: hidden;
-	overflow-y: scroll;
-	max-height:400px;
+.datatable-wrapper	> .datatable-thead.affix{
+	z-index:2;
+	top:0;
+	width:inherit;
+}
+
+.datatable-wrapper	> .datatable-tbody  > table > thead{
+	visibility:hidden;
 }

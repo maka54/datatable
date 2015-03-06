@@ -121,20 +121,20 @@ class Datatable {
 	private function built(){
 		$builder = $this->builder;
 		
-		$count = $builder->count();
+		$collection = $builder->get();
+		$count = $collection->count();
 					
 		$page = $this->storage->page;
 		$length = $this->storage->length;
-		
+				
 		$skip = ($page - 1) * $length;
 		
-		$datas = $builder->skip( $skip )->take( $length )->get();
-		
-		// si pas de résultat, on passe en première page
-		if(count($datas) == 0 && $skip != 0){
-			$datas = $builder->skip( 0 )->take( $length )->get();
-			$this->storage->page = $page = 1;
+		if($skip > $count){
+			$skip = 0;
+			$this->storage->page = 1;
 		}
+		
+		$datas = $collection->slice($skip, $length);
 		
 		return array($datas, $count);
 	}
