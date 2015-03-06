@@ -19,22 +19,9 @@
 			@endif
 		</tbody>
 	</table>
-	
-	@unless ( $rows )
-		<p class="text-center">@lang('datatable::datatable.notfound')</p>
-	@endunless
-
-	@if( $pagination )
-		<div>
-			<div class="pull-left">
-				{{ $pagination }}
-			</div>
-			<div class="pull-right">
-				{{ $elements }}
-			</div>	
-			<div class="clearfix"></div>
-		</div>
-	@endif
-
 </div>
+@unless ( $rows )
+	<p class="text-center">@lang('datatable::datatable.notfound')</p>
+@endunless
+
 

@@ -2,6 +2,9 @@
 
 use Illuminate\Config\Repository as Config;
 use Illuminate\View\Factory as Factory;
+use Illuminate\Support\Facades\Paginator as Paginator;
+use Illuminate\Session\SessionManager as Session;
+use Illuminate\Http\Request as Request;
 
 class Datatable {
 	
@@ -9,36 +12,39 @@ class Datatable {
 	var $factory;
 	
 	private $builder = null;
-	private $length = null;
 	private $columns = [];
-	private $fields = null;
-	private $withs = [];
-	private $paginate = false;
-	
-	public $route = null;
+	private $pagination = null;
+	private $paginator = null;
 	public $sortable = null;
-	public $sorter = null;
+	public $searchable = null;
+	public $route = null;
+	private $session = null;
+	private $SID = null;
+	public $ajax = null;
+	private $request = null;
 	
-	public function __construct(Config $config, Factory $factory) {
+	public function __construct(Config $config, Factory $factory, Session $session, Request $request) {
 		$this->config = $config;
 		$this->factory = $factory;	
+		$this->session = $session;	
+		$this->request = $request;	
+		
+		$this->storage = new Libraries\Storage( $config->get('datatable::rows.default') );
 	}
 	
 	public function model( $model ){
-		$model = "\\{$model}";
 		$this->builder = $model::select('*');
+		$this->storage->push( $this->resolve( $model ) );
 		return $this;
 	}
 	
-	
-	
-	public function with(){
-		$this->withs = array_merge($this->withs, func_get_args());
-		return $this;
+	private function resolve( $model ){
+		$this->SID = $SID = $this->config->get('datatable::prefix') . with(new $model)->getTable();
+		return $this->session->get($SID) ?: [];
 	}
 	
-	public function select(){
-		$this->fields = func_get_args();
+	public function inputs( $args ){
+		$this->storage->push( $args );
 		return $this;
 	}
 	
@@ -46,11 +52,10 @@ class Datatable {
 	
 	public function column( $column, $header = null, $value = null, $attrinute = array()){
 		if(!in_array( $column, $this->columns))
-			$this->columns[$column] = new Column($this, $column, $header, $value, $attrinute);
+			$this->columns[$column] = new Libraries\Column($this, $column, $header, $value, $attrinute);
 		
 		return $this;
 	}
-	
 	
 	public function query( $closure ){
 
@@ -61,21 +66,21 @@ class Datatable {
 		return $this;
 	}
 	
-	public function sorter( $column ){
-		preg_match('/^(-)?(.*)$/', $column, $m);
-		$this->sorter = (object) ['column' => $m[2], 'direction' => empty($m[1]) ];
+	public function ajax(){
+		$this->ajax = true;
 		return $this;
 	}
 	
-	public function sortable( $columns, $expect = false ){
-		$this->sortable = (object) ['columns' => $columns, 'expect' => $expect];
-		return $this;
-	}
 	
-	public function paginate( $length ){
-		$this->length = $length;
-		$this->paginate = true;
+	public function sortable( $columns = null, $default = null){
+		$this->storage->sort = $this->storage->sort ?: $default;
 		
+		$this->sortable = (object) ['columns' => $columns];
+		return $this;
+	}
+	
+	public function searchable( $columns = null ){
+		$this->searchable = (object) ['columns' => $columns];
 		return $this;
 	}
 	
@@ -83,41 +88,93 @@ class Datatable {
 		$this->route = $route;
 		return $this;
 	}
+	
+	public function sortby(){
+		preg_match('/^(-)?(.*)$/', $this->storage->sort, $m);
+		return [$m[2], empty($m[1]) ];
+	}
 		
 	private function build(){
 		
-
-		if( $this->fields )
-			call_user_func_array(array($this->builder, 'select'), $this->fields);
-
-		if($this->withs)
-			$this->builder->with( $this->withs );
+		$builder = $this->builder;
 				
-		$this->builder->orderBy( $this->sorter->column , ($this->sorter->direction ? 'asc' : 'desc') );
-		
-		if($this->paginate){
-			$this->length = $this->length ?: $this->config->get('datatable::rows.default');
-			return $this->builder->paginate( $this->length );
+		if($this->sortable && $this->storage->sort){
+			list( $column, $direction) = $this->sortby();
+			$builder->orderBy( $column, $direction ? 'asc' : 'desc' );
 		}
+		
+		if($this->storage->search){
+			$colums = (array) $this->searchable->columns;
 			
-		return $this->builder->get();
+			$builder->where(function ($query) use ($colums) {
+				$first = array_shift($colums);
+				$query->where($first, 'LIKE', "%{$this->storage->search}%");
+				
+				foreach($colums as $column){
+					$query->orWhere($column, 'LIKE', "%{$this->storage->search}%");
+				}
+			});
+		}
+		
+	}
+
+	private function built(){
+		$builder = $this->builder;
+		
+		$count = $builder->count();
+					
+		$page = $this->storage->page;
+		$length = $this->storage->length;
+		
+		$skip = ($page - 1) * $length;
+		
+		$datas = $builder->skip( $skip )->take( $length )->get();
+		
+		// si pas de résultat, on passe en première page
+		if(count($datas) == 0 && $skip != 0){
+			$datas = $builder->skip( 0 )->take( $length )->get();
+			$this->storage->page = $page = 1;
+		}
+		
+		return array($datas, $count);
+	}
+	
+	private function pagination($datas, $count){
+		
+		Paginator::setCurrentPage( $this->storage->page );
+		$paginator = Paginator::make( (array) $datas, $count, $this->storage->length);
+		$paginator->setBaseUrl( route($this->route) );
+		
+		$presenter = new Libraries\Presenter($paginator);
+		
+		if( $this->ajax ){
+			$presenter->ajax();
+		}
+		
+		return $this->factory->make( $this->config->get('datatable::view.pagination') , compact('paginator', 'presenter'));
 	}
 	
 	private function elements(){
 		$elements = [];
 		
 		foreach($this->config->get('datatable::rows.elements') as $length){
-			$elements[] = new Element( $this->route, $length, $this->length);
+			$elements[] = new Libraries\Element( $this->route, $length, $this->storage->length, $this->ajax);
 		}
 		
 		return $this->factory->make( $this->config->get('datatable::view.elements') , compact('elements'));
 	}
+		
+	private function form(){	
+		$search = $this->storage->search;
+		$route = $this->route;
+		
+		return $this->factory->make( $this->config->get('datatable::view.form') , compact('search', 'route'));
+	}
 	
-	public function render( $numbers = null){
-		$headers = $rows = $elements = $pagination = null;
-		
-		$datas = $this->build();	
-		
+	private function table( $datas ){
+
+		$headers = $rows = null;
+
 		foreach($this->columns as $column):
 			$headers[] = ['value' => $column->head(), 'attributes' => $column->attributes];
 		endforeach;
@@ -129,17 +186,71 @@ class Datatable {
 			endforeach;
 			$rows[] = $cells;
 		endforeach;
-			
-			
-		if($this->paginate){
-			$datas->setBaseUrl( route($this->route) );
-			$elements = $this->elements();
-			$pagination = $datas->links();
-		}
-
-
-		return $this->factory->make( $this->config->get('datatable::view.table') , compact('rows', 'headers', 'pagination', 'elements' ));
+		
+		return $this->factory->make( $this->config->get('datatable::view.table') , compact('rows', 'headers'));
 	}
+	
+	private function script( $id ){	
+		return "
+		<script type='text/javascript'>
+			$(function(){
+				var \$datatable = $('#$id');
+				
+				\$datatable.on('click', '[data-href]', function(e) {
+					e.preventDefault();
+					href = $(this).data('href');
+					
+					\$datatable.addClass('loading');
+					\$datatable.load( href, function() {
+						\$datatable.removeClass('loading');
+					});
+				}).on('submit', 'form', function(e) {
+					e.preventDefault();
+					
+					
+					href = $(this).attr('action');
+					fd = $(this).serialize();
+					
+					\$datatable.addClass('loading');
+					\$datatable.load( href, fd, function() {
+						\$datatable.removeClass('loading');				
+					});
+					
+				});
+										
+			});
+		</script>";
+	}
+	
+	public function render( $numbers = null){
+		$script = $id = $ajax = null;
+	
+		// build query
+		$this->build();	
+		
+		// return $datas built, with count
+		list($datas, $count) = $this->built();	
+		
+		
+		$pagination = $this->pagination( $datas, $count);
+		$table =  $this->table( $datas );
+		$elements = $this->elements();
+		$form = ($this->searchable) ? $this->form() : null;
+
+		
+		// save session before rendering datatable
+		$this->session->put( $this->SID, $this->storage->toArray() );
+	
+		
+		if(!$this->request->ajax() && $this->ajax) {
+			$id = str_replace('.', '_', $this->SID);
+			$script = $this->script( $id ); 
+			$ajax = true;
+		}
+		
+		return $this->factory->make( $this->config->get('datatable::view.layout') , compact('table', 'form', 'elements', 'pagination', 'id', 'script', 'ajax' ));
+	}
+	
 	
 	
 

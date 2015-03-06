@@ -1,16 +1,15 @@
-<?php namespace Maka\Datatable;
+<?php namespace Maka\Datatable\Libraries;
 
-use \HTML;
 
-class Column {
+class Storage {
 	
-	protected $table;
+	public $table;
 	protected $name;
 	protected $header;
 	protected $value;
 	protected $attributes;
 	
-	public  function __construct( Datatable $table, $name, $header = null, $value = null, $attributes = array() ){
+	public  function __construct( Session $session ){
 		$this->table = $table;
 		$this->name = $name;		
 		$this->header = $header ?: $name;		
@@ -75,16 +74,20 @@ class Column {
 	}
 	
 	public function head(){
-
-		if(!$this->table->sortable // sortable undefined 
-		|| (in_array($this->name, $this->table->sortable->columns) && $this->table->sortable->expect) // sortable column expect defined 
-		|| (!in_array($this->name, $this->table->sortable->columns) && !$this->table->sortable->expect) ) // sortable column accept not defined 
+		
+		$srtbl = $this->table->sortable;
+		$class = 'sort';
+		$sort = $this->name;
+		
+		if(!$srtbl || (!in_array($this->name, $srtbl->columns))) // sortable column accept not defined 
 			return $this->header;
 		
-		
-		$sort = ($this->table->sorter->column == $this->name && $this->table->sorter->direction  ? '-' : '') . $this->name;
-		$direction = ($this->table->sorter->column == $this->name) ? ($this->table->sorter->direction  ? 'asc' : 'desc') : '';
-		$class = join(' ', ['sort', $direction]);
+		if( $srtbl->default->column == $this->name ){
+			$sort = ($srtbl->default->direction  ? '-' : '') . $sort;
+			$class .= $srtbl->default->direction  ? ' asc' : ' desc';
+			
+		}
+
 		return html_entity_decode(link_to_route( $this->table->route, $this->header, ['sort' => $sort ], ['class' => $class] ));
 	}
 

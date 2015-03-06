@@ -10,7 +10,11 @@ return array(
 	*/
 
 	'notfound' => 'Aucun résultat',
-
 	'elements' => 'éléments',
+	
+	'form' => [
+		'placeholder' => 'Rechercher ...',
+		'submit' => 'Ok'
+	],
 
 );

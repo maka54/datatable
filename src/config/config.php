@@ -23,7 +23,20 @@ return array(
 	*/
 	
 	'view' =>  [
-		'table' => 'datatable::datatable',
+		'layout' => 'datatable::layout',
+		'table' => 'datatable::table',
 		'elements' => 'datatable::elements',
+		'form' => 'datatable::form',
+		'pagination' => 'datatable::pagination',
 	],
+	
+	/*
+	|--------------------------------------------------------------------------
+	| Prefix Session datatable uses
+	|--------------------------------------------------------------------------
+	| Define a prefix used to store session datatable
+	|
+	*/
+	
+	'prefix' => 'datatable.',
 );

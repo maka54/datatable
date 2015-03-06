@@ -30,7 +30,7 @@ class DatatableServiceProvider extends ServiceProvider {
 	{
 		$this->app['datatable'] = $this->app->share(function($app)
 		{
-			return new Datatable($app['config'], $app['view']);
+			return new Datatable($app['config'], $app['view'], $app['session'], $app['request']);
 		});
 	}
 
