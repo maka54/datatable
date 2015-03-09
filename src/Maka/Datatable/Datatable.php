@@ -5,6 +5,7 @@ use Illuminate\View\Factory as Factory;
 use Illuminate\Support\Facades\Paginator as Paginator;
 use Illuminate\Session\SessionManager as Session;
 use Illuminate\Http\Request as Request;
+use Illuminate\Support\Facades\Response as Response;
 
 class Datatable {
 	
@@ -222,7 +223,45 @@ class Datatable {
 		</script>";
 	}
 	
-	public function render( $numbers = null){
+	public function export(){
+		
+		
+		
+		$collection = $this->builder->get();
+				
+		$rows = $cells = [];
+		
+		foreach($this->columns as $column):
+			$cells[] = $column->header;
+		endforeach;
+		
+		$rows[] = $cells;
+		
+		foreach($collection as $row):
+			$cells = [];
+			foreach($this->columns as $column):
+				$cells[] = $column->val( $row );
+			endforeach;
+			$rows[] = $cells;
+		endforeach;
+				
+		$headers  = [
+			'Content-type'        => 'text/csv',
+			'Content-Disposition' => 'attachment; filename=products.csv'
+		];
+		
+		$stream = function() use ($rows) {
+			$output = fopen('php://output', 'w');
+			foreach ($rows as $row) { 
+				fputcsv($output, $row);
+			}
+			fclose($output);
+		};
+		
+		return Response::stream($stream, 200, $headers);
+	}
+	
+	public function render(){
 		$script = $id = $ajax = null;
 	
 		// build query
