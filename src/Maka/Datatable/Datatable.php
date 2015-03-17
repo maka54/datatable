@@ -144,7 +144,7 @@ class Datatable {
 		
 		Paginator::setCurrentPage( $this->storage->page );
 		$paginator = Paginator::make( (array) $datas, $count, $this->storage->length);
-		$paginator->setBaseUrl( route($this->route) );
+		$paginator->setBaseUrl( route($this->route, $this->parameters) );
 		
 		$presenter = new Libraries\Presenter($paginator);
 		
