@@ -106,7 +106,7 @@ class Datatable {
 			$builder->orderBy( $column, $direction ? 'asc' : 'desc' );
 		}
 		
-		if($this->storage->search){
+		if($this->storage->search && $this->searchable && $this->searchable->columns){
 			$colums = (array) $this->searchable->columns;
 			
 			$builder->where(function ($query) use ($colums) {
