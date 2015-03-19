@@ -41,7 +41,7 @@ class Datatable {
 	}
 	
 	private function resolve( $model, $sname ){
-		$this->SID = $SID = $this->config->get('datatable::prefix') . $sname ?: with(new $model)->getTable();
+		$this->SID = $SID = $this->config->get('datatable::prefix') . ($sname ?: with(new $model)->getTable());
 		return $this->session->get($SID) ?: [];
 	}
 	
