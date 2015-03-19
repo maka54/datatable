@@ -34,14 +34,14 @@ class Datatable {
 		$this->storage = new Libraries\Storage( $config->get('datatable::rows.default') );
 	}
 	
-	public function model( $model ){
+	public function model( $model, $sname = null ){
 		$this->builder = $model::select('*');
-		$this->storage->push( $this->resolve( $model ) );
+		$this->storage->push( $this->resolve( $model, $sname  ) );
 		return $this;
 	}
 	
-	private function resolve( $model ){
-		$this->SID = $SID = $this->config->get('datatable::prefix') . with(new $model)->getTable();
+	private function resolve( $model, $sname ){
+		$this->SID = $SID = $this->config->get('datatable::prefix') . $sname ?: with(new $model)->getTable();
 		return $this->session->get($SID) ?: [];
 	}
 	
