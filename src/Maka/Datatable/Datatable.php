@@ -86,8 +86,9 @@ class Datatable {
 		return $this;
 	}
 	
-	public function route( $route ){
+	public function route( $route, $parameters = null ){
 		$this->route = $route;
+		$this->parameters = (array) $parameters;
 		return $this;
 	}
 	
