@@ -90,12 +90,14 @@ class Column {
 			$sort = ($direction  ? '-' : '') . $sort;
 			$class .= $direction  ? ' asc' : ' desc';
 		}
+		
+		$parameters = $this->table->parameters + ['sort' => $sort ];
 
 		if( $this->table->ajax ){
-			return html_entity_decode(link_to('#' , $this->header, ['data-href' => route( $this->table->route , ['sort' => $sort ] ), 'class' => $class ]));
+			return html_entity_decode(link_to('#' , $this->header, ['data-href' => route( $this->table->route , $parameters ), 'class' => $class ]));
 		}
 		
-		return html_entity_decode(link_to_route( $this->table->route, $this->header, ['sort' => $sort ], ['class' => $class] ));
+		return html_entity_decode(link_to_route( $this->table->route, $this->header, $parameters, ['class' => $class] ));
 	
 	}
 

@@ -161,7 +161,7 @@ class Datatable {
 		$elements = [];
 		
 		foreach($this->config->get('datatable::rows.elements') as $length){
-			$elements[] = new Libraries\Element( $this->route, $length, $this->storage->length, $this->ajax);
+			$elements[] = new Libraries\Element( $this->route, $this->parameters, $length, $this->storage->length, $this->ajax);
 		}
 		
 		return $this->factory->make( $this->config->get('datatable::view.elements') , compact('elements'));
