@@ -19,6 +19,7 @@ class Datatable {
 	public $sortable = null;
 	public $searchable = null;
 	public $route = null;
+	public $parameters = null;
 	private $session = null;
 	private $SID = null;
 	public $ajax = null;
