@@ -14,7 +14,8 @@ return array(
 	
 	'form' => [
 		'placeholder' => 'Rechercher ...',
-		'submit' => 'Ok'
+		'submit' => 'Ok',
+		'reset' => 'Effacer',
 	],
 
 );
