@@ -46,6 +46,10 @@ class Datatable {
 	}
 	
 	public function inputs( $args ){
+		
+		if( isset($args['reset']) )
+			$args['search'] = null;
+		
 		$this->storage->push( $args );
 		return $this;
 	}
@@ -201,18 +205,22 @@ class Datatable {
 				
 				\$datatable.on('click', '[data-href]', function(e) {
 					e.preventDefault();
+					
 					href = $(this).data('href');
 					
 					\$datatable.addClass('loading');
 					\$datatable.load( href, function() {
 						\$datatable.removeClass('loading');
 					});
-				}).on('submit', 'form', function(e) {
+				});
+				
+				\$datatable.on('click', 'form :submit', 'form', function(e) {
 					e.preventDefault();
+
+					\$form = $(this).closest('form');
+					fd = (\$(this).attr('name') == 'reset') ? 'reset' : \$form.serialize();		
 					
-					
-					href = $(this).attr('action');
-					fd = $(this).serialize();
+					href = \$form.attr('action');
 					
 					\$datatable.addClass('loading');
 					\$datatable.load( href, fd, function() {
