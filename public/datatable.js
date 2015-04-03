@@ -53,19 +53,9 @@
 			
 			this.resize();
 			
-			$(window).on('resize', function(){
+			$(window).on('resize scroll', function(){
 				self.resize();
 			});
-			
-			$(window).on('scroll', function(){
-
-				if( $(this).scrollTop() > self.$datatable.offset().top ){
-					self.$header.addClass('affix');
-				} else {
-					self.$header.removeClass('affix');
-				}				
-			});
-			
 
         },
 		
@@ -82,8 +72,14 @@
 				$(this).width( widths[index] );
 			});  
 			
-			this.$element.css({marginTop: - this.$heading.outerHeight(true) + 'px'});
+			this.$header.css({marginBottom: - this.$heading.outerHeight(true) + 'px'});
 			this.$header.width( this.$container.width() );
+			
+			if( $(window).scrollTop() > this.$datatable.offset().top ){
+				this.$header.addClass('affix');
+			} else {
+				this.$header.removeClass('affix');
+			}
 			
 		}
 
@@ -103,7 +99,7 @@
 			}
 
 			if (typeof options === "string" && $.isFunction((fn = data[options]))) {
-				fn.apply(data, args);
+				fn.apply(data, []);
 			}
 			
         });

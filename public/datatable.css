@@ -1,6 +1,6 @@
 
 .datatable-wrapper{
-	overflow: hidden;
+	position:relative;
 }
 
 .datatable-wrapper	> .datatable-thead > table {
