@@ -173,9 +173,8 @@ class Datatable {
 		
 	private function form(){	
 		$search = $this->storage->search;
-		$route = $this->route;
-		
-		return $this->factory->make( $this->config->get('datatable::view.form') , compact('search', 'route'));
+		$url = route( $this->route, $this->parameters);
+		return $this->factory->make( $this->config->get('datatable::view.form') , compact('search', 'url'));
 	}
 	
 	private function table( $datas ){
