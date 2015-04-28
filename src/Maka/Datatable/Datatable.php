@@ -14,6 +14,7 @@ class Datatable {
 	
 	private $builder = null;
 	private $columns = [];
+	private $row;
 	private $pagination = null;
 	private $paginator = null;
 	public $sortable = null;
@@ -56,9 +57,15 @@ class Datatable {
 	
 	
 	
-	public function column( $column, $header = null, $value = null, $attrinute = array()){
+	public function column( $column, $header = null, $value = null, $attribute = array()){
 		if(!in_array( $column, $this->columns))
-			$this->columns[$column] = new Libraries\Column($this, $column, $header, $value, $attrinute);
+			$this->columns[$column] = new Libraries\Column($this, $column, $header, $value, $attribute);
+		
+		return $this;
+	}
+	
+	public function row( $attribute = array() ){
+		$this->row = new Libraries\Row($this, $attribute);
 		
 		return $this;
 	}
@@ -190,7 +197,10 @@ class Datatable {
 			foreach($this->columns as $column):
 				$cells[] = ['value' => $column->val( $row ), 'attributes' => $column->attributes];
 			endforeach;
-			$rows[] = $cells;
+			
+			$attributes = $this->row ? $this->row->render( $row ) : '';
+			
+			$rows[] = ['cells' => $cells, 'attributes' => $attributes ];
 		endforeach;
 		
 		return $this->factory->make( $this->config->get('datatable::view.table') , compact('rows', 'headers'));
@@ -234,7 +244,7 @@ class Datatable {
 	
 	public function export(){
 		
-		
+		$this->build();	
 		
 		$collection = $this->builder->get();
 				
