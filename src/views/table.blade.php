@@ -1,5 +1,5 @@
 <div class="datatable-container">
-	<table class="table table-striped table-hover datatable">
+	<table class="table table-condensed table-striped table-hover datatable">
 		<thead>
 			<tr>
 				@foreach ($headers as $head)
@@ -10,8 +10,8 @@
 		<tbody>
 			@if( $rows )
 				@foreach ($rows as $row)
-				<tr>
-					@foreach ($row as $cell)
+				<tr {{ $row['attributes'] }}>
+					@foreach ($row['cells'] as $cell)
 					<td {{ $cell['attributes'] }}>{{ $cell['value'] }}</td>
 					@endforeach
 				</tr>
