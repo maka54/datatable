@@ -242,8 +242,7 @@ class Datatable {
 		</script>";
 	}
 	
-	public function export(){
-		
+	private function csv(){
 		$this->build();	
 		
 		$collection = $this->builder->get();
@@ -263,11 +262,18 @@ class Datatable {
 			endforeach;
 			$rows[] = $cells;
 		endforeach;
-				
+		
+		return $rows;
+	}
+	
+	public function export(){
+			
 		$headers  = [
 			'Content-type'        => 'text/csv',
 			'Content-Disposition' => 'attachment; filename=products.csv'
 		];
+		
+		$rows = $this->csv();	
 		
 		$stream = function() use ($rows) {
 			$output = fopen('php://output', 'w');
@@ -278,6 +284,26 @@ class Datatable {
 		};
 		
 		return Response::stream($stream, 200, $headers);
+	}
+	
+	public function linkTo(){
+		
+		$filename = date('YmdHis') . '-export.csv';
+		$directory = $this->config->get('datatable::downloads');
+		$DS = DIRECTORY_SEPARATOR;
+		
+		$path = public_path() . $DS . $directory . $DS . $filename;
+		$link_to = url() . '/' . $directory . '/' . $filename;
+		
+		$rows = $this->csv();	
+				
+		$output = fopen($path, 'w');
+		foreach ($rows as $row) { 
+			fputcsv($output, $row);
+		}
+		fclose($output);
+		
+		return $link_to;
 	}
 	
 	public function render(){
