@@ -39,4 +39,14 @@ return array(
 	*/
 	
 	'prefix' => 'datatable.',
+	
+	/*
+	|--------------------------------------------------------------------------
+	| Directory to downloads
+	|--------------------------------------------------------------------------
+	| Define the directory to register export file
+	|
+	*/
+	
+	'downloads' => 'downloads',
 );
